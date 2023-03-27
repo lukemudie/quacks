@@ -85,8 +85,8 @@ class Bag:
 
         Returns
         -------
-        selected_ingredient : [str, int]
-            The selected ingredient token in the form [color, value].
+        selected_ingredient : Ingredient class
+            The instance of the selected ingredient.
         """
         selected_ingredient = None
 
