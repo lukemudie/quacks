@@ -1,6 +1,10 @@
 import pandas as pd
+import numpy as np
 import random
 from copy import deepcopy
+import matplotlib.pyplot as plt
+import seaborn as sns
+
 
 class Ingredient:
     """
@@ -161,3 +165,50 @@ class Bag:
 
         self.reset_ingredients()
         return [overall_total, white_total]
+
+    def generate_statistics(self, num_rounds=10000):
+        """
+        Runs simulated rounds for the bag of ingredients for both playing safe and playing until exploding
+        and plots the distribution of results.
+
+        Parameters
+        ----------
+        num_rounds: int
+            The number of rounds to be simulated. By default set to 10000.
+
+        Returns
+        -------
+        None
+        """
+        print(f'Running {num_rounds:,} rounds for a bag...\n')
+        self.print_ingredients('master')
+
+        exploded_round_values = []
+        for i in range(num_rounds):
+            temp_round_values = self.simulate_round()
+            exploded_round_values.append(temp_round_values[0])
+        print(f'\nExploded Maximum score: {np.max(exploded_round_values)}')
+        print(f'Exploded Average score: {np.mean(exploded_round_values):.2f}')
+
+        safe_round_values = []
+        for i in range(num_rounds):
+            temp_round_values = self.simulate_round(stop_before_explosion=True)
+            safe_round_values.append(temp_round_values[0])
+        print(f'\nSafe Maximum score: {np.max(safe_round_values)}')
+        print(f'Safe Average score: {np.mean(safe_round_values):.2f}')
+
+        exploded_df = pd.DataFrame({'value': exploded_round_values, 'run_type': 'exploded'})
+        safe_df = pd.DataFrame({'value': safe_round_values, 'run_type': 'safe'})
+
+        sns.histplot(
+            data=pd.concat([exploded_df, safe_df]),
+            x='value',
+            hue='run_type',
+            element='step',
+            bins=np.max(exploded_round_values),
+            discrete=True
+        )
+        plt.xlabel('Spaces Moved')
+        plt.ylabel('Simulated Occurrences')
+        plt.title('Playing Safe vs Picking Until Exploding:\nHow Often Will You Move X Spaces?')
+        plt.legend(bbox_to_anchor=(1.02, 1), loc='upper left', labels=['Play Safe', 'Explode'], title='Strategy')
