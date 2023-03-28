@@ -1,3 +1,6 @@
+# local files just used for testing
+_local*.*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
