@@ -105,20 +105,50 @@ class Bag:
 
     def add_ingredient(self, color, value):
         """
-        Add a single ingredient to the bag.
+        Permanently add a single ingredient to the bag.
 
         Parameters
         ----------
-        color : string
-            The color of the ingredient.
+        color : str
+            The color of the ingredient to add.
         value : int
-            The value of the ingredient token.
+            The value of the ingredient token to add.
 
         Returns
         -------
-        None
+        Instance of the new Ingredient that is added.
         """
-        self.master_ingredients.append(Ingredient(color, value))
+        new_ingredient = Ingredient(color, value)
+        self.master_ingredients.append(new_ingredient)
+        return new_ingredient
+
+    def remove_ingredient(self, color, value):
+        """
+        Permanently remove a single specified ingredient from the bag if it exists.
+
+        Parameters
+        ----------
+        color : str
+            The color of the ingredient to remove.
+        value : int
+            The value of the ingredient token to remove.
+
+        Returns
+        -------
+        If one is removed, the instance of the Ingredient class that is removed from the master list
+        else None
+        """
+        potential_ingredients = [
+            ingredient for ingredient in self.master_ingredients
+            if ingredient.color == color and ingredient.value == value
+        ]
+
+        if len(potential_ingredients) > 0:
+            self.master_ingredients.remove(potential_ingredients[0])
+            return potential_ingredients[0]
+        else:
+            print('There is no ingredient in the bag that matches so none have been removed!')
+            return None
 
     def return_to_baseline(self):
         """Reset the available ingredients back to the starting set."""
@@ -152,6 +182,7 @@ class Bag:
 
         while picking:
             selected = self.pick_ingredient()
+
             overall_total += selected.value
             if selected.color == 'white':
                 white_total += selected.value
