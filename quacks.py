@@ -78,8 +78,8 @@ class Bag:
         ----------
         color : str
             The color of ingredient to sum the values for.
-        set_of_ingredients : str
-            The set of ingredients to sum the values for: 'master', 'current' or 'picked'. By default, 'current'.
+        set_of_ingredients : {'master', 'current', 'picked'} (default 'current')
+            The set of ingredients to sum the values for.
 
         Returns
         -------
@@ -97,8 +97,8 @@ class Bag:
         ----------
         color : str
             The color of ingredient to find the max value for.
-        set_of_ingredients : str
-            The set of ingredients to find the max value for: 'master', 'current' or 'picked'. By default, 'current'.
+        set_of_ingredients : {'master', 'current', 'picked'} (default 'current')
+            The set of ingredients to find the max value for.
 
         Returns
         -------
@@ -251,15 +251,19 @@ class Bag:
 
         return [overall_total, white_total]
 
-    def generate_statistics(self, num_rounds=10000, risk_tolerance=0):
+    def generate_statistics(self, show_ingredients=True, show_graphs=True, num_rounds=10000, risk_tolerance=0):
         """
         Runs simulated rounds for the bag of ingredients for both playing safe and playing until exploding
         and plots the distribution of results.
 
         Parameters
         ----------
-        num_rounds: int
-            The number of rounds to be simulated. By default, set to 10000.
+        show_ingredients : bool (default True)
+            If True, will print out the master ingredients list to show what the simulations are being run on.
+        show_graphs : bool (default True)
+            If True, will show the histogram plot of the simulation results at the end.
+        num_rounds: int (default 10000)
+            The number of rounds to be simulated.
         risk_tolerance: float
             The chance to explode will have to be less than the given value in order to keep picking.
             Will be passed to simulate_round()
@@ -269,7 +273,8 @@ class Bag:
         None
         """
         print(f'Running {num_rounds:,} rounds for a bag...\n')
-        self.print_ingredients('master')
+        if show_ingredients:
+            self.print_ingredients('master')
 
         exploded_round_values = []
         for i in range(num_rounds):
@@ -285,18 +290,19 @@ class Bag:
         print(f'\nSafe Maximum score: {np.max(safe_round_values)}')
         print(f'Safe Average score: {np.mean(safe_round_values):.2f}')
 
-        exploded_df = pd.DataFrame({'value': exploded_round_values, 'run_type': 'exploded'})
-        safe_df = pd.DataFrame({'value': safe_round_values, 'run_type': 'safe'})
+        if show_graphs:
+            exploded_df = pd.DataFrame({'value': exploded_round_values, 'run_type': 'exploded'})
+            safe_df = pd.DataFrame({'value': safe_round_values, 'run_type': 'safe'})
 
-        sns.histplot(
-            data=pd.concat([exploded_df, safe_df]),
-            x='value',
-            hue='run_type',
-            element='step',
-            bins=np.max(exploded_round_values),
-            discrete=True
-        )
-        plt.xlabel('Spaces Moved')
-        plt.ylabel('Simulated Occurrences')
-        plt.title('Playing Safe vs Picking Until Exploding:\nHow Often Will You Move X Spaces?')
-        plt.legend(bbox_to_anchor=(1.02, 1), loc='upper left', labels=['Play Safe', 'Explode'], title='Strategy')
+            sns.histplot(
+                data=pd.concat([exploded_df, safe_df]),
+                x='value',
+                hue='run_type',
+                element='step',
+                bins=np.max(exploded_round_values),
+                discrete=True
+            )
+            plt.xlabel('Spaces Moved')
+            plt.ylabel('Simulated Occurrences')
+            plt.title('Playing Safe vs Picking Until Exploding:\nHow Often Will You Move X Spaces?')
+            plt.legend(bbox_to_anchor=(1.02, 1), loc='upper left', labels=['Play Safe', 'Explode'], title='Strategy')
