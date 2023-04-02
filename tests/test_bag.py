@@ -1,5 +1,5 @@
 import pytest
-from quacks import Bag
+from quacks import Bag, Ingredient
 
 
 class TestSumCurrentIngredientColor:
@@ -31,6 +31,60 @@ class TestMaxCurrentIngredientColor:
         """Error when no parameter is passed."""
         with pytest.raises(TypeError):
             Bag().max_current_ingredient_color()
+
+
+class TestPickedWhiteValue:
+    def test_empty_value(self):
+        """Check value is 0 when the picked list is empty"""
+        assert Bag().current_picked_white_value() == 0
+
+    def test_all_default_picked(self):
+        """Check value is 11 when all the default white tokens have been picked"""
+        bag = Bag()
+        bag.picked_ingredients = bag.master_ingredients
+        assert bag.current_picked_white_value() == 11
+
+
+class TestChanceToExplode:
+    def test_default_chance(self):
+        """Check that with no tokens picked, the chance to explode should be 0"""
+        assert Bag().chance_to_explode() == 0
+
+    def test_one_needed_to_explode(self):
+        """Check that the chance is correct when only 1 is needed to explode"""
+        bag = Bag()
+        bag.picked_ingredients = [
+            Ingredient('white', 3), Ingredient('white', 2), Ingredient('white', 1), Ingredient('white', 1)
+        ]
+        bag.current_ingredients = [
+            Ingredient('white', 2), Ingredient('white', 1), Ingredient('white', 1),
+            Ingredient('orange', 1), Ingredient('green', 1)
+        ]
+        assert bag.chance_to_explode() == 3/5
+
+    def test_two_needed_to_explode(self):
+        """Check that only the 2 or 3 value tokens will count towards the probability when 2 more needed to explode"""
+        bag = Bag()
+        bag.picked_ingredients = [
+            Ingredient('white', 2), Ingredient('white', 1), Ingredient('white', 1), Ingredient('white', 1),
+            Ingredient('white', 1)
+        ]
+        bag.current_ingredients = [
+            Ingredient('white', 3), Ingredient('white', 2), Ingredient('orange', 1), Ingredient('green', 1)
+        ]
+        assert bag.chance_to_explode() == 2 / 4
+
+    def test_three_needed_to_explode(self):
+        """Check that only the 3 value token will count towards the probability when 3 more needed to explode"""
+        bag = Bag()
+        bag.picked_ingredients = [
+            Ingredient('white', 2), Ingredient('white', 2), Ingredient('white', 1)
+        ]
+        bag.current_ingredients = [
+            Ingredient('white', 3), Ingredient('white', 1), Ingredient('white', 1), Ingredient('white', 1),
+            Ingredient('orange', 1), Ingredient('green', 1)
+        ]
+        assert bag.chance_to_explode() == 1 / 6
 
 
 class TestPickIngredient:

@@ -82,6 +82,24 @@ class Bag:
         """Find the max from the values of all the tokens of a given color that are in the current ingredients"""
         return max([ingredient.value for ingredient in self.current_ingredients if ingredient.color == color])
 
+    def current_picked_white_value(self):
+        """Gives the total of all the white ingredients that have been picked so far"""
+        return sum([ingredient.value for ingredient in self.picked_ingredients if ingredient.color == 'white'])
+
+    def chance_to_explode(self):
+        """Get the probability of exploding on the next pick based on what has been picked so far"""
+        value_needed_to_explode = self.explosion_limit - self.current_picked_white_value() + 1
+        if self.max_current_ingredient_color('white') < value_needed_to_explode:
+            chance_to_explode = 0
+        else:
+            explosion_causing_tokens = [
+                ingredient for ingredient in self.current_ingredients
+                if ingredient.color == 'white' and ingredient.value >= value_needed_to_explode
+            ]
+            chance_to_explode = len(explosion_causing_tokens) / len(self.current_ingredients)
+
+        return chance_to_explode
+
     def pick_ingredient(self):
         """
         Pick an ingredient at random from those remaining in the bag and remove it.
@@ -210,7 +228,7 @@ class Bag:
         Parameters
         ----------
         num_rounds: int
-            The number of rounds to be simulated. By default set to 10000.
+            The number of rounds to be simulated. By default, set to 10000.
 
         Returns
         -------
