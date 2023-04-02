@@ -272,8 +272,9 @@ class Bag:
         -------
         None
         """
-        print(f'Running {num_rounds:,} rounds for a bag...\n')
+        print(f'Running {num_rounds:,} rounds for a bag...')
         if show_ingredients:
+            print()
             self.print_ingredients('master')
 
         exploded_round_values = []
