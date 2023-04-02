@@ -23,14 +23,19 @@ class TestMaxCurrentIngredientColor:
         assert Bag().max_current_ingredient_color('white') == 3
 
     def test_empty_color(self):
-        """Error when looking for the max of a color that doesn't exist in the bag."""
-        with pytest.raises(ValueError):
-            Bag().max_current_ingredient_color('made_up_color')
+        """Return 0 when looking for the max of a color that doesn't exist in the bag."""
+        assert Bag().max_current_ingredient_color('made_up_color') == 0
 
     def test_no_color_passed(self):
         """Error when no parameter is passed."""
         with pytest.raises(TypeError):
             Bag().max_current_ingredient_color()
+
+    def test_empty_list(self):
+        """Return 0 when the list is empty"""
+        bag = Bag()
+        bag.current_ingredients = []
+        assert bag.max_current_ingredient_color('white') == 0
 
 
 class TestPickedWhiteValue:
@@ -46,6 +51,12 @@ class TestPickedWhiteValue:
 
 
 class TestChanceToExplode:
+    def test_empty_current_ingredients(self):
+        """Check that we're not trying to divide by 0"""
+        bag = Bag()
+        bag.current_ingredients = []
+        assert bag.chance_to_explode() == 0
+
     def test_default_chance(self):
         """Check that with no tokens picked, the chance to explode should be 0"""
         assert Bag().chance_to_explode() == 0

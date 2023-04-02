@@ -80,7 +80,11 @@ class Bag:
 
     def max_current_ingredient_color(self, color):
         """Find the max from the values of all the tokens of a given color that are in the current ingredients"""
-        return max([ingredient.value for ingredient in self.current_ingredients if ingredient.color == color])
+        if len(self.current_ingredients) == 0 \
+                or color not in list(dict.fromkeys([ingredient.color for ingredient in self.current_ingredients])):
+            return 0
+        else:
+            return max([ingredient.value for ingredient in self.current_ingredients if ingredient.color == color])
 
     def current_picked_white_value(self):
         """Gives the total of all the white ingredients that have been picked so far"""
@@ -89,7 +93,8 @@ class Bag:
     def chance_to_explode(self):
         """Get the probability of exploding on the next pick based on what has been picked so far"""
         value_needed_to_explode = self.explosion_limit - self.current_picked_white_value() + 1
-        if self.max_current_ingredient_color('white') < value_needed_to_explode:
+        if self.max_current_ingredient_color('white') < value_needed_to_explode \
+                or len(self.current_ingredients) == 0:
             chance_to_explode = 0
         else:
             explosion_causing_tokens = [
@@ -181,7 +186,7 @@ class Bag:
         self.master_ingredients.extend([Ingredient('green', value) for value in [1]])
         self.reset_ingredients()
 
-    def simulate_round(self, stop_before_explosion=False, risk_tolerance=0.25):
+    def simulate_round(self, stop_before_explosion=False, risk_tolerance=0):
         """
         Plays out a full round of picking ingredients, adhering to the specified playstyle.
 
@@ -199,28 +204,23 @@ class Bag:
         """
         self.reset_ingredients()
 
-        overall_total = 0
-        white_total = 0
         picking = True
-
         while picking:
-            selected = self.pick_ingredient()
+            self.pick_ingredient()
 
-            overall_total += selected.value
-            if selected.color == 'white':
-                white_total += selected.value
+            if self.current_picked_white_value() > self.explosion_limit:
+                picking = False
+            elif stop_before_explosion and self.chance_to_explode() > risk_tolerance:
+                picking = False
 
-            if stop_before_explosion:
-                if self.max_current_ingredient_color('white') + white_total > self.explosion_limit:
-                    picking = False
-            else:
-                if white_total > self.explosion_limit:
-                    picking = False
+        overall_total = sum([ingredient.value for ingredient in self.picked_ingredients])
+        white_total = sum([ingredient.value for ingredient in self.picked_ingredients if ingredient.color == 'white'])
 
         self.reset_ingredients()
+
         return [overall_total, white_total]
 
-    def generate_statistics(self, num_rounds=10000):
+    def generate_statistics(self, num_rounds=10000, risk_tolerance=0):
         """
         Runs simulated rounds for the bag of ingredients for both playing safe and playing until exploding
         and plots the distribution of results.
@@ -229,6 +229,9 @@ class Bag:
         ----------
         num_rounds: int
             The number of rounds to be simulated. By default, set to 10000.
+        risk_tolerance: float
+            The chance to explode will have to be less than the given value in order to keep picking.
+            Will be passed to simulate_round()
 
         Returns
         -------
@@ -246,7 +249,7 @@ class Bag:
 
         safe_round_values = []
         for i in range(num_rounds):
-            temp_round_values = self.simulate_round(stop_before_explosion=True)
+            temp_round_values = self.simulate_round(stop_before_explosion=True, risk_tolerance=risk_tolerance)
             safe_round_values.append(temp_round_values[0])
         print(f'\nSafe Maximum score: {np.max(safe_round_values)}')
         print(f'Safe Average score: {np.mean(safe_round_values):.2f}')
