@@ -125,7 +125,7 @@ class Bag:
 
         return selected_ingredient
 
-    def reset_ingredients(self):
+    def reset_picked_ingredients(self):
         """Put all picked ingredients back in the bag,
         including those that have been added over the course of the game."""
         self.current_ingredients = deepcopy(self.master_ingredients)
@@ -184,7 +184,7 @@ class Bag:
         self.master_ingredients.extend([Ingredient('white', value) for value in [1, 1, 1, 1, 2, 2, 3]])
         self.master_ingredients.extend([Ingredient('orange', value) for value in [1]])
         self.master_ingredients.extend([Ingredient('green', value) for value in [1]])
-        self.reset_ingredients()
+        self.reset_picked_ingredients()
 
     def simulate_round(self, stop_before_explosion=False, risk_tolerance=0):
         """
@@ -202,7 +202,7 @@ class Bag:
         [int, int]
             List containing the total spaces the player moved, followed by the total whites they ended up with.
         """
-        self.reset_ingredients()
+        self.reset_picked_ingredients()
 
         picking = True
         while picking:
@@ -216,7 +216,7 @@ class Bag:
         overall_total = sum([ingredient.value for ingredient in self.picked_ingredients])
         white_total = sum([ingredient.value for ingredient in self.picked_ingredients if ingredient.color == 'white'])
 
-        self.reset_ingredients()
+        self.reset_picked_ingredients()
 
         return [overall_total, white_total]
 
