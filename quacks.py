@@ -59,19 +59,16 @@ class Bag:
         -------
         None
         """
-        ingredients = []
-        if set_of_ingredients == 'master':
-            ingredients = self.ingredients['master']
-        elif set_of_ingredients == 'current':
-            ingredients = self.ingredients['current']
-        elif set_of_ingredients == 'picked':
-            ingredients = self.ingredients['picked']
-        print(f'Showing the {set_of_ingredients} set of ingredients:')
+        if set_of_ingredients in ['master', 'current', 'picked']:
+            ingredients = self.ingredients[set_of_ingredients]
+            print(f"Showing the '{set_of_ingredients}' set of ingredients:")
 
-        unique_colors = list(dict.fromkeys([ingredient.color for ingredient in ingredients]))
-        for color in unique_colors:
-            print(f'    {color}: ', end='')
-            print([ingredient.value for ingredient in ingredients if ingredient.color == color])
+            unique_colors = list(dict.fromkeys([ingredient.color for ingredient in ingredients]))
+            for color in unique_colors:
+                print(f'    {color}: ', end='')
+                print([ingredient.value for ingredient in ingredients if ingredient.color == color])
+        else:
+            print(f"The '{set_of_ingredients}' set of ingredients does not exist.")
 
     def sum_current_ingredient_color(self, color):
         """Adds up the values of all the tokens of a given color that are in the current ingredients"""
