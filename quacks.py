@@ -229,7 +229,7 @@ class Bag:
 
         Returns
         -------
-        [int, int]
+        [overall_total, white_total] : [int, int]
             List containing the total spaces the player moved, followed by the total whites they ended up with.
         """
         self.reset_picked_ingredients()
