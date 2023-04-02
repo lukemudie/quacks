@@ -34,7 +34,7 @@ class TestMaxCurrentIngredientColor:
     def test_empty_list(self):
         """Return 0 when the list is empty"""
         bag = Bag()
-        bag.current_ingredients = []
+        bag.ingredients['current'] = []
         assert bag.max_current_ingredient_color('white') == 0
 
 
@@ -46,7 +46,7 @@ class TestPickedWhiteValue:
     def test_all_default_picked(self):
         """Check value is 11 when all the default white tokens have been picked"""
         bag = Bag()
-        bag.picked_ingredients = bag.master_ingredients
+        bag.ingredients['picked'] = bag.ingredients['master']
         assert bag.current_picked_white_value() == 11
 
 
@@ -64,10 +64,10 @@ class TestChanceToExplode:
     def test_one_needed_to_explode(self):
         """Check that the chance is correct when only 1 is needed to explode"""
         bag = Bag()
-        bag.picked_ingredients = [
+        bag.ingredients['picked'] = [
             Ingredient('white', 3), Ingredient('white', 2), Ingredient('white', 1), Ingredient('white', 1)
         ]
-        bag.current_ingredients = [
+        bag.ingredients['current'] = [
             Ingredient('white', 2), Ingredient('white', 1), Ingredient('white', 1),
             Ingredient('orange', 1), Ingredient('green', 1)
         ]
@@ -76,11 +76,11 @@ class TestChanceToExplode:
     def test_two_needed_to_explode(self):
         """Check that only the 2 or 3 value tokens will count towards the probability when 2 more needed to explode"""
         bag = Bag()
-        bag.picked_ingredients = [
+        bag.ingredients['picked'] = [
             Ingredient('white', 2), Ingredient('white', 1), Ingredient('white', 1), Ingredient('white', 1),
             Ingredient('white', 1)
         ]
-        bag.current_ingredients = [
+        bag.ingredients['current'] = [
             Ingredient('white', 3), Ingredient('white', 2), Ingredient('orange', 1), Ingredient('green', 1)
         ]
         assert bag.chance_to_explode() == 2 / 4
@@ -88,10 +88,10 @@ class TestChanceToExplode:
     def test_three_needed_to_explode(self):
         """Check that only the 3 value token will count towards the probability when 3 more needed to explode"""
         bag = Bag()
-        bag.picked_ingredients = [
+        bag.ingredients['picked'] = [
             Ingredient('white', 2), Ingredient('white', 2), Ingredient('white', 1)
         ]
-        bag.current_ingredients = [
+        bag.ingredients['current'] = [
             Ingredient('white', 3), Ingredient('white', 1), Ingredient('white', 1), Ingredient('white', 1),
             Ingredient('orange', 1), Ingredient('green', 1)
         ]
@@ -102,18 +102,28 @@ class TestPickIngredient:
     def test_pick_from_empty_bag(self):
         """Check that None is returned when picking from an empty bag"""
         bag = Bag()
-        bag.current_ingredients = []
+        bag.ingredients['current'] = []
         assert bag.pick_ingredient() is None
 
+
+class TestResetPickedIngredients:
+    def test_current_equals_master(self):
+        """Check that the current_ingredients list is now the same as the master_ingredients"""
+        bag = Bag()
+        bag.pick_ingredient()
+        bag.reset_picked_ingredients()
+        assert (
+            len(bag.ingredients['current']) == len(bag.ingredients['master'])
+        )
 
 class TestAddIngredient:
     def test_add_white_one_token(self):
         """Check that when adding a white token with value 1, the correct object is returned and the length of
         master_ingredients is 1 more than before."""
         bag = Bag()
-        before_ingredient_count = len(bag.master_ingredients)
+        before_ingredient_count = len(bag.ingredients['master'])
         added_token = bag.add_ingredient('white', 1)
-        after_ingredient_count = len(bag.master_ingredients)
+        after_ingredient_count = len(bag.ingredients['master'])
         assert (
             added_token.color == 'white'
             and added_token.value == 1
@@ -131,9 +141,9 @@ class TestRemoveIngredient:
         """Check that when removing a white token with value 1, the correct object is returned and the length of
         master_ingredients is 1 less than before."""
         bag = Bag()
-        before_ingredient_count = len(bag.master_ingredients)
+        before_ingredient_count = len(bag.ingredients['master'])
         removed_token = bag.remove_ingredient('white', 1)
-        after_ingredient_count = len(bag.master_ingredients)
+        after_ingredient_count = len(bag.ingredients['master'])
         assert (
             removed_token.color == 'white'
             and removed_token.value == 1
@@ -144,27 +154,27 @@ class TestRemoveIngredient:
         """Check that when trying to remove an ingredient by a color that doesn't exist, that None is returned
         and the length of master_ingredients is the same as before."""
         bag = Bag()
-        before_ingredient_count = len(bag.master_ingredients)
+        before_ingredient_count = len(bag.ingredients['master'])
         removed_token = bag.remove_ingredient('made_up_color', 1)
-        after_ingredient_count = len(bag.master_ingredients)
+        after_ingredient_count = len(bag.ingredients['master'])
         assert removed_token is None and before_ingredient_count == after_ingredient_count
 
     def test_remove_wrong_value(self):
         """Check that when trying to remove an ingredient by a value that doesn't exist, that None is returned
         and the length of master_ingredients is the same as before."""
         bag = Bag()
-        before_ingredient_count = len(bag.master_ingredients)
+        before_ingredient_count = len(bag.ingredients['master'])
         removed_token = bag.remove_ingredient('white', 10)
-        after_ingredient_count = len(bag.master_ingredients)
+        after_ingredient_count = len(bag.ingredients['master'])
         assert removed_token is None and before_ingredient_count == after_ingredient_count
 
     def test_remove_from_empty_bag(self):
         """Check that trying to remove an ingredient from an empty bag will return nothing and that the
         master_ingredients list is still empty."""
         bag = Bag()
-        bag.master_ingredients = []
+        bag.ingredients['master'] = []
         removed_ingredient = bag.remove_ingredient('white', 1)
-        assert removed_ingredient is None and len(bag.master_ingredients) == 0
+        assert removed_ingredient is None and len(bag.ingredients['master']) == 0
 
     def test_no_parameters_passed(self):
         """Error when no parameter is passed."""

@@ -28,11 +28,10 @@ class Bag:
 
     Attributes
     ----------
-    master_ingredients : list of the Ingredient class
-        A list of all ingredients the player has collected.
-    current_ingredients : list of the Ingredient class
-        A list of all ingredients currently in the player's bag. By default, this will be
-        the same as master_ingredients but will change as the player buys more ingredients.
+    ingredients : dict of lists of the Ingredient class
+        'master': all ingredients available to the player.
+        'current': the ingredients currently in the bag that have not been picked.
+        'picked': the ingredients that have been picked and are no longer in the bag.
     explosion_limit : int
         The total value of white ingredients that have to be exceeded when pulled in order
         for the player to explode.
@@ -40,10 +39,10 @@ class Bag:
 
     def __init__(self):
         """Initialise the bag with the standard starting ingredients."""
-        self.master_ingredients = []
+        self.ingredients = {'master': [], 'current': [], 'picked': []}
         self.return_to_baseline()
-        self.current_ingredients = deepcopy(self.master_ingredients)
-        self.picked_ingredients = []
+        self.ingredients['current'] = deepcopy(self.ingredients['master'])
+        self.ingredients['picked'] = []
         self.explosion_limit = 7
 
     def print_ingredients(self, set_of_ingredients='master'):
@@ -62,11 +61,11 @@ class Bag:
         """
         ingredients = []
         if set_of_ingredients == 'master':
-            ingredients = self.master_ingredients
+            ingredients = self.ingredients['master']
         elif set_of_ingredients == 'current':
-            ingredients = self.current_ingredients
+            ingredients = self.ingredients['current']
         elif set_of_ingredients == 'picked':
-            ingredients = self.picked_ingredients
+            ingredients = self.ingredients['picked']
         print(f'Showing the {set_of_ingredients} set of ingredients:')
 
         unique_colors = list(dict.fromkeys([ingredient.color for ingredient in ingredients]))
@@ -76,32 +75,32 @@ class Bag:
 
     def sum_current_ingredient_color(self, color):
         """Adds up the values of all the tokens of a given color that are in the current ingredients"""
-        return sum([ingredient.value for ingredient in self.current_ingredients if ingredient.color == color])
+        return sum([ingredient.value for ingredient in self.ingredients['current'] if ingredient.color == color])
 
     def max_current_ingredient_color(self, color):
         """Find the max from the values of all the tokens of a given color that are in the current ingredients"""
-        if len(self.current_ingredients) == 0 \
-                or color not in list(dict.fromkeys([ingredient.color for ingredient in self.current_ingredients])):
+        if len(self.ingredients['current']) == 0 \
+                or color not in list(dict.fromkeys([ingredient.color for ingredient in self.ingredients['current']])):
             return 0
         else:
-            return max([ingredient.value for ingredient in self.current_ingredients if ingredient.color == color])
+            return max([ingredient.value for ingredient in self.ingredients['current'] if ingredient.color == color])
 
     def current_picked_white_value(self):
         """Gives the total of all the white ingredients that have been picked so far"""
-        return sum([ingredient.value for ingredient in self.picked_ingredients if ingredient.color == 'white'])
+        return sum([ingredient.value for ingredient in self.ingredients['picked'] if ingredient.color == 'white'])
 
     def chance_to_explode(self):
         """Get the probability of exploding on the next pick based on what has been picked so far"""
         value_needed_to_explode = self.explosion_limit - self.current_picked_white_value() + 1
         if self.max_current_ingredient_color('white') < value_needed_to_explode \
-                or len(self.current_ingredients) == 0:
+                or len(self.ingredients['current']) == 0:
             chance_to_explode = 0
         else:
             explosion_causing_tokens = [
-                ingredient for ingredient in self.current_ingredients
+                ingredient for ingredient in self.ingredients['current']
                 if ingredient.color == 'white' and ingredient.value >= value_needed_to_explode
             ]
-            chance_to_explode = len(explosion_causing_tokens) / len(self.current_ingredients)
+            chance_to_explode = len(explosion_causing_tokens) / len(self.ingredients['current'])
 
         return chance_to_explode
 
@@ -116,10 +115,10 @@ class Bag:
         """
         selected_ingredient = None
 
-        if len(self.current_ingredients) > 0:
-            selected_ingredient = random.choice(self.current_ingredients)
-            self.current_ingredients.remove(selected_ingredient)
-            self.picked_ingredients.append(selected_ingredient)
+        if len(self.ingredients['current']) > 0:
+            selected_ingredient = random.choice(self.ingredients['current'])
+            self.ingredients['current'].remove(selected_ingredient)
+            self.ingredients['picked'].append(selected_ingredient)
         else:
             print('the bag is empty!')
 
@@ -128,8 +127,8 @@ class Bag:
     def reset_picked_ingredients(self):
         """Put all picked ingredients back in the bag,
         including those that have been added over the course of the game."""
-        self.current_ingredients = deepcopy(self.master_ingredients)
-        self.picked_ingredients = []
+        self.ingredients['current'] = deepcopy(self.ingredients['master'])
+        self.ingredients['picked'] = []
 
     def add_ingredient(self, color, value):
         """
@@ -147,7 +146,7 @@ class Bag:
         Instance of the new Ingredient that is added.
         """
         new_ingredient = Ingredient(color, value)
-        self.master_ingredients.append(new_ingredient)
+        self.ingredients['master'].append(new_ingredient)
         return new_ingredient
 
     def remove_ingredient(self, color, value):
@@ -167,12 +166,12 @@ class Bag:
         else None
         """
         potential_ingredients = [
-            ingredient for ingredient in self.master_ingredients
+            ingredient for ingredient in self.ingredients['master']
             if ingredient.color == color and ingredient.value == value
         ]
 
         if len(potential_ingredients) > 0:
-            self.master_ingredients.remove(potential_ingredients[0])
+            self.ingredients['master'].remove(potential_ingredients[0])
             return potential_ingredients[0]
         else:
             print('There is no ingredient in the bag that matches so none have been removed!')
@@ -180,10 +179,10 @@ class Bag:
 
     def return_to_baseline(self):
         """Reset the available ingredients back to the starting set."""
-        self.master_ingredients = []
-        self.master_ingredients.extend([Ingredient('white', value) for value in [1, 1, 1, 1, 2, 2, 3]])
-        self.master_ingredients.extend([Ingredient('orange', value) for value in [1]])
-        self.master_ingredients.extend([Ingredient('green', value) for value in [1]])
+        self.ingredients['master'] = []
+        self.ingredients['master'].extend([Ingredient('white', value) for value in [1, 1, 1, 1, 2, 2, 3]])
+        self.ingredients['master'].extend([Ingredient('orange', value) for value in [1]])
+        self.ingredients['master'].extend([Ingredient('green', value) for value in [1]])
         self.reset_picked_ingredients()
 
     def simulate_round(self, stop_before_explosion=False, risk_tolerance=0):
@@ -213,8 +212,9 @@ class Bag:
             elif stop_before_explosion and self.chance_to_explode() > risk_tolerance:
                 picking = False
 
-        overall_total = sum([ingredient.value for ingredient in self.picked_ingredients])
-        white_total = sum([ingredient.value for ingredient in self.picked_ingredients if ingredient.color == 'white'])
+        overall_total = sum([ingredient.value for ingredient in self.ingredients['picked']])
+        white_total = sum([ingredient.value for ingredient in self.ingredients['picked']
+                           if ingredient.color == 'white'])
 
         self.reset_picked_ingredients()
 
