@@ -5,37 +5,37 @@ from quacks import Bag, Ingredient
 class TestSumCurrentIngredientColor:
     def test_default_sum(self):
         """Check that the sum of all the white ingredients in a starting bag is 11."""
-        assert Bag().sum_current_ingredient_color('white') == 11
+        assert Bag().sum_ingredient_color('white') == 11
 
     def test_empty_color(self):
         """Check that if a no ingredients of a selected color exist in the bag, the sum is 0."""
-        assert Bag().sum_current_ingredient_color('made_up_color') == 0
+        assert Bag().sum_ingredient_color('made_up_color') == 0
 
     def test_no_color_passed(self):
         """Error when no parameter is passed."""
         with pytest.raises(TypeError):
-            Bag().sum_current_ingredient_color()
+            Bag().sum_ingredient_color()
 
 
 class TestMaxCurrentIngredientColor:
     def test_default_max(self):
         """Check the max ingredient value in the starting bag is a (white) 3."""
-        assert Bag().max_current_ingredient_color('white') == 3
+        assert Bag().max_ingredient_color('white') == 3
 
     def test_empty_color(self):
         """Return 0 when looking for the max of a color that doesn't exist in the bag."""
-        assert Bag().max_current_ingredient_color('made_up_color') == 0
+        assert Bag().max_ingredient_color('made_up_color') == 0
 
     def test_no_color_passed(self):
         """Error when no parameter is passed."""
         with pytest.raises(TypeError):
-            Bag().max_current_ingredient_color()
+            Bag().max_ingredient_color()
 
     def test_empty_list(self):
         """Return 0 when the list is empty"""
         bag = Bag()
         bag.ingredients['current'] = []
-        assert bag.max_current_ingredient_color('white') == 0
+        assert bag.max_ingredient_color('white') == 0
 
 
 class TestPickedWhiteValue:

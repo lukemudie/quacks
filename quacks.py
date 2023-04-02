@@ -70,17 +70,51 @@ class Bag:
         else:
             print(f"The '{set_of_ingredients}' set of ingredients does not exist.")
 
-    def sum_current_ingredient_color(self, color):
-        """Adds up the values of all the tokens of a given color that are in the current ingredients"""
-        return sum([ingredient.value for ingredient in self.ingredients['current'] if ingredient.color == color])
+    def sum_ingredient_color(self, color, set_of_ingredients='current'):
+        """
+        Adds up the values of all the tokens of a given color that are in the given list of ingredients.
 
-    def max_current_ingredient_color(self, color):
-        """Find the max from the values of all the tokens of a given color that are in the current ingredients"""
-        if len(self.ingredients['current']) == 0 \
-                or color not in list(dict.fromkeys([ingredient.color for ingredient in self.ingredients['current']])):
+        Parameters
+        ----------
+        color : str
+            The color of ingredient to sum the values for.
+        set_of_ingredients : str
+            The set of ingredients to sum the values for: 'master', 'current' or 'picked'. By default, 'current'.
+
+        Returns
+        -------
+        sum : int
+            The sum of the values of all the tokens of the given color.
+        """
+        return sum([ingredient.value for ingredient in self.ingredients[set_of_ingredients]
+                    if ingredient.color == color])
+
+    def max_ingredient_color(self, color, set_of_ingredients='current'):
+        """
+        Find the max from the values of all the tokens of a given color that are in the current ingredients.
+
+        Parameters
+        ----------
+        color : str
+            The color of ingredient to find the max value for.
+        set_of_ingredients : str
+            The set of ingredients to find the max value for: 'master', 'current' or 'picked'. By default, 'current'.
+
+        Returns
+        -------
+        max : int
+            The max of the values of all the tokens of the given color.
+        """
+        len_chosen_ingredients = len(self.ingredients[set_of_ingredients])
+        colors_chosen_ingredients = list(
+            dict.fromkeys([ingredient.color for ingredient in self.ingredients[set_of_ingredients]])
+        )
+        if len_chosen_ingredients == 0 or color not in colors_chosen_ingredients:
             return 0
         else:
-            return max([ingredient.value for ingredient in self.ingredients['current'] if ingredient.color == color])
+            return max(
+                [ingredient.value for ingredient in self.ingredients[set_of_ingredients] if ingredient.color == color]
+            )
 
     def current_picked_white_value(self):
         """Gives the total of all the white ingredients that have been picked so far"""
@@ -89,7 +123,7 @@ class Bag:
     def chance_to_explode(self):
         """Get the probability of exploding on the next pick based on what has been picked so far"""
         value_needed_to_explode = self.explosion_limit - self.current_picked_white_value() + 1
-        if self.max_current_ingredient_color('white') < value_needed_to_explode \
+        if self.max_ingredient_color('white') < value_needed_to_explode \
                 or len(self.ingredients['current']) == 0:
             chance_to_explode = 0
         else:
