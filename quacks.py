@@ -45,7 +45,7 @@ class Bag:
         self.ingredients['picked'] = []
         self.explosion_limit = 7
 
-    def print_ingredients(self, set_of_ingredients='master'):
+    def print_ingredients(self, set_of_ingredients='current'):
         """
         Prints out a list of all the ingredient values in the bag, grouped by color.
 
