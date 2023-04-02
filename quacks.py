@@ -43,6 +43,7 @@ class Bag:
         self.master_ingredients = []
         self.return_to_baseline()
         self.current_ingredients = deepcopy(self.master_ingredients)
+        self.picked_ingredients = []
         self.explosion_limit = 7
 
     def print_ingredients(self, set_of_ingredients='master'):
@@ -64,6 +65,8 @@ class Bag:
             ingredients = self.master_ingredients
         elif set_of_ingredients == 'current':
             ingredients = self.current_ingredients
+        elif set_of_ingredients == 'picked':
+            ingredients = self.picked_ingredients
         print(f'Showing the {set_of_ingredients} set of ingredients:')
 
         unique_colors = list(dict.fromkeys([ingredient.color for ingredient in ingredients]))
@@ -93,6 +96,7 @@ class Bag:
         if len(self.current_ingredients) > 0:
             selected_ingredient = random.choice(self.current_ingredients)
             self.current_ingredients.remove(selected_ingredient)
+            self.picked_ingredients.append(selected_ingredient)
         else:
             print('the bag is empty!')
 
@@ -102,6 +106,7 @@ class Bag:
         """Put all picked ingredients back in the bag,
         including those that have been added over the course of the game."""
         self.current_ingredients = deepcopy(self.master_ingredients)
+        self.picked_ingredients = []
 
     def add_ingredient(self, color, value):
         """
