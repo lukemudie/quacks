@@ -222,10 +222,10 @@ class Bag:
 
         Parameters
         ----------
-        stop_before_explosion : boolean
+        stop_before_explosion : boolean (default False)
             Specifies whether the player should stop picking if they know they could explode.
-        risk_tolerance : not yet implemented
-            To keep pulling, would need less than x% chance of blowing up.
+        risk_tolerance : int (default 0)
+            To keep pulling, would need less than x chance of blowing up; probability between 0 and 1.
 
         Returns
         -------
