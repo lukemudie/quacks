@@ -28,6 +28,98 @@ class Player:
         self.rat_tails = 0
         self.has_potion = True
 
+    def simulate_round(self, stop_before_explosion=False, risk_tolerance=0):
+        """
+        Plays out a full round of picking ingredients, adhering to the specified playstyle.
+
+        Parameters
+        ----------
+        stop_before_explosion : boolean (default False)
+            Specifies whether the player should stop picking if they know they could explode.
+        risk_tolerance : int (default 0)
+            To keep pulling, would need less than x chance of blowing up; probability between 0 and 1.
+
+        Returns
+        -------
+        [overall_total, white_total] : [int, int]
+            List containing the total spaces the player moved, followed by the total whites they ended up with.
+        """
+        self.bag.reset_picked_ingredients()
+
+        picking = True
+        while picking:
+            self.bag.pick_ingredient()
+
+            if self.bag.current_picked_white_value() > self.bag.explosion_limit:
+                picking = False
+            elif stop_before_explosion and self.bag.chance_to_explode() > risk_tolerance:
+                picking = False
+
+        overall_total = sum([ingredient.value for ingredient in self.bag.ingredients['picked']])
+        white_total = sum([ingredient.value for ingredient in self.bag.ingredients['picked']
+                           if ingredient.color == 'white'])
+
+        self.bag.reset_picked_ingredients()
+
+        return [overall_total, white_total]
+
+    def generate_statistics(self, show_ingredients=True, show_graphs=True, num_rounds=10000, risk_tolerance=0):
+        """
+        Runs simulated rounds for the bag of ingredients for both playing safe and playing until exploding
+        and plots the distribution of results.
+
+        Parameters
+        ----------
+        show_ingredients : bool (default True)
+            If True, will print out the master ingredients list to show what the simulations are being run on.
+        show_graphs : bool (default True)
+            If True, will show the histogram plot of the simulation results at the end.
+        num_rounds: int (default 10000)
+            The number of rounds to be simulated.
+        risk_tolerance: float
+            The chance to explode will have to be less than the given value in order to keep picking.
+            Will be passed to simulate_round()
+
+        Returns
+        -------
+        None
+        """
+        print(f'Running {num_rounds:,} rounds for a bag...')
+        if show_ingredients:
+            print()
+            self.bag.print_ingredients('master')
+
+        exploded_round_values = []
+        for i in range(num_rounds):
+            temp_round_values = self.simulate_round()
+            exploded_round_values.append(temp_round_values[0])
+        print(f'\nExploded Maximum score: {np.max(exploded_round_values)}')
+        print(f'Exploded Average score: {np.mean(exploded_round_values):.2f}')
+
+        safe_round_values = []
+        for i in range(num_rounds):
+            temp_round_values = self.simulate_round(stop_before_explosion=True, risk_tolerance=risk_tolerance)
+            safe_round_values.append(temp_round_values[0])
+        print(f'\nSafe Maximum score: {np.max(safe_round_values)}')
+        print(f'Safe Average score: {np.mean(safe_round_values):.2f}')
+
+        if show_graphs:
+            exploded_df = pd.DataFrame({'value': exploded_round_values, 'run_type': 'exploded'})
+            safe_df = pd.DataFrame({'value': safe_round_values, 'run_type': 'safe'})
+
+            sns.histplot(
+                data=pd.concat([exploded_df, safe_df]),
+                x='value',
+                hue='run_type',
+                element='step',
+                bins=np.max(exploded_round_values),
+                discrete=True
+            )
+            plt.xlabel('Spaces Moved')
+            plt.ylabel('Simulated Occurrences')
+            plt.title('Playing Safe vs Picking Until Exploding:\nHow Often Will You Move X Spaces?')
+            plt.legend(bbox_to_anchor=(1.02, 1), loc='upper left', labels=['Play Safe', 'Explode'], title='Strategy')
+
 
 class Board:
     """
@@ -260,95 +352,3 @@ class Bag:
         self.ingredients['master'].extend([Ingredient('orange', value) for value in [1]])
         self.ingredients['master'].extend([Ingredient('green', value) for value in [1]])
         self.reset_picked_ingredients()
-
-    def simulate_round(self, stop_before_explosion=False, risk_tolerance=0):
-        """
-        Plays out a full round of picking ingredients, adhering to the specified playstyle.
-
-        Parameters
-        ----------
-        stop_before_explosion : boolean (default False)
-            Specifies whether the player should stop picking if they know they could explode.
-        risk_tolerance : int (default 0)
-            To keep pulling, would need less than x chance of blowing up; probability between 0 and 1.
-
-        Returns
-        -------
-        [overall_total, white_total] : [int, int]
-            List containing the total spaces the player moved, followed by the total whites they ended up with.
-        """
-        self.reset_picked_ingredients()
-
-        picking = True
-        while picking:
-            self.pick_ingredient()
-
-            if self.current_picked_white_value() > self.explosion_limit:
-                picking = False
-            elif stop_before_explosion and self.chance_to_explode() > risk_tolerance:
-                picking = False
-
-        overall_total = sum([ingredient.value for ingredient in self.ingredients['picked']])
-        white_total = sum([ingredient.value for ingredient in self.ingredients['picked']
-                           if ingredient.color == 'white'])
-
-        self.reset_picked_ingredients()
-
-        return [overall_total, white_total]
-
-    def generate_statistics(self, show_ingredients=True, show_graphs=True, num_rounds=10000, risk_tolerance=0):
-        """
-        Runs simulated rounds for the bag of ingredients for both playing safe and playing until exploding
-        and plots the distribution of results.
-
-        Parameters
-        ----------
-        show_ingredients : bool (default True)
-            If True, will print out the master ingredients list to show what the simulations are being run on.
-        show_graphs : bool (default True)
-            If True, will show the histogram plot of the simulation results at the end.
-        num_rounds: int (default 10000)
-            The number of rounds to be simulated.
-        risk_tolerance: float
-            The chance to explode will have to be less than the given value in order to keep picking.
-            Will be passed to simulate_round()
-
-        Returns
-        -------
-        None
-        """
-        print(f'Running {num_rounds:,} rounds for a bag...')
-        if show_ingredients:
-            print()
-            self.print_ingredients('master')
-
-        exploded_round_values = []
-        for i in range(num_rounds):
-            temp_round_values = self.simulate_round()
-            exploded_round_values.append(temp_round_values[0])
-        print(f'\nExploded Maximum score: {np.max(exploded_round_values)}')
-        print(f'Exploded Average score: {np.mean(exploded_round_values):.2f}')
-
-        safe_round_values = []
-        for i in range(num_rounds):
-            temp_round_values = self.simulate_round(stop_before_explosion=True, risk_tolerance=risk_tolerance)
-            safe_round_values.append(temp_round_values[0])
-        print(f'\nSafe Maximum score: {np.max(safe_round_values)}')
-        print(f'Safe Average score: {np.mean(safe_round_values):.2f}')
-
-        if show_graphs:
-            exploded_df = pd.DataFrame({'value': exploded_round_values, 'run_type': 'exploded'})
-            safe_df = pd.DataFrame({'value': safe_round_values, 'run_type': 'safe'})
-
-            sns.histplot(
-                data=pd.concat([exploded_df, safe_df]),
-                x='value',
-                hue='run_type',
-                element='step',
-                bins=np.max(exploded_round_values),
-                discrete=True
-            )
-            plt.xlabel('Spaces Moved')
-            plt.ylabel('Simulated Occurrences')
-            plt.title('Playing Safe vs Picking Until Exploding:\nHow Often Will You Move X Spaces?')
-            plt.legend(bbox_to_anchor=(1.02, 1), loc='upper left', labels=['Play Safe', 'Explode'], title='Strategy')
