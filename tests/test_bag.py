@@ -116,6 +116,7 @@ class TestResetPickedIngredients:
             len(bag.ingredients['current']) == len(bag.ingredients['master'])
         )
 
+
 class TestAddIngredient:
     def test_add_white_one_token(self):
         """Check that when adding a white token with value 1, the correct object is returned and the length of
