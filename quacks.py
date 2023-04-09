@@ -139,11 +139,11 @@ class Player:
                 exploded_count = exploded_df[['value']].loc[exploded_df['value'] == value].count()[0]
                 safe_count = safe_df[['value']].loc[safe_df['value'] == value].count()[0]
                 if exploded_count >= safe_count:
-                    exploded_labels.append(self.board.money_values[value + 1])
+                    exploded_labels.append(f'${self.board.money_values[value + 1]}')
                     safe_labels.append('')
                 else:
                     exploded_labels.append('')
-                    safe_labels.append(self.board.money_values[value + 1])
+                    safe_labels.append(f'${self.board.money_values[value + 1]}')
 
             ax.bar_label(ax.containers[0], safe_labels)
             ax.bar_label(ax.containers[1], exploded_labels)
