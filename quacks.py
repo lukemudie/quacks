@@ -117,15 +117,25 @@ class Player:
         if show_graphs:
             exploded_df = pd.DataFrame({'value': exploded_round_values, 'run_type': 'exploded'})
             safe_df = pd.DataFrame({'value': safe_round_values, 'run_type': 'safe'})
+            overall_df = pd.concat([exploded_df, safe_df])
 
-            sns.histplot(
-                data=pd.concat([exploded_df, safe_df]),
+            print(overall_df.dtypes)
+
+            ax = sns.histplot(
+                data=overall_df,
                 x='value',
                 hue='run_type',
-                element='step',
+                # element='step',
                 bins=np.max(exploded_round_values),
                 discrete=True
             )
+
+            # getting values to label the bars that are different to the number of spaces moved
+            x_values = list(overall_df['value'].sort_values().unique())
+            label_values = [self.board.money_values[x_value] for x_value in x_values]
+            for bars in ax.containers:
+                ax.bar_label(bars, label_values)
+
             plt.xlabel('Place of Final Ingredient Token')
             plt.ylabel('Simulated Occurrences')
             plt.title('Playing Safe vs Picking Until Exploding:\nHow Often Will You Move X Spaces?')
