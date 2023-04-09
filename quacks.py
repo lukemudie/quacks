@@ -46,8 +46,8 @@ class Player:
         -------
         dict : {int, int, int}
             'final_position': the position on the board of the last ingredient token placed this round.
-            'overall_total': the total value of all ingredients pulled.
-            'white_total': the total value of all white ingredients pulled.
+            'overall_value': the total value of all ingredients pulled.
+            'white_value': the total value of all white ingredients pulled.
         """
         self.bag.reset_picked_ingredients()
 
@@ -60,18 +60,18 @@ class Player:
             elif stop_before_explosion and self.bag.chance_to_explode() > risk_tolerance:
                 picking = False
 
-        overall_total = sum([ingredient.value for ingredient in self.bag.ingredients['picked']])
-        white_total = sum([ingredient.value for ingredient in self.bag.ingredients['picked']
+        overall_value = sum([ingredient.value for ingredient in self.bag.ingredients['picked']])
+        white_value = sum([ingredient.value for ingredient in self.bag.ingredients['picked']
                            if ingredient.color == 'white'])
 
-        final_position = self.droplet_position + self.rat_tails + overall_total
+        final_position = self.droplet_position + self.rat_tails + overall_value
 
         self.bag.reset_picked_ingredients()
 
         return {
             'final_position': final_position,
-            'overall_total': overall_total,
-            'white_total': white_total
+            'overall_value': overall_value,
+            'white_value': white_value
         }
 
     def generate_statistics(self, show_ingredients=True, show_graphs=True, num_rounds=10000, risk_tolerance=0):
