@@ -44,8 +44,10 @@ class Player:
 
         Returns
         -------
-        [overall_total, white_total] : [int, int]
-            List containing the total spaces the player moved, followed by the total whites they ended up with.
+        dict : {int, int, int}
+            'final_position': the position on the board of the last ingredient token placed this round.
+            'overall_total': the total value of all ingredients pulled.
+            'white_total': the total value of all white ingredients pulled.
         """
         self.bag.reset_picked_ingredients()
 
@@ -62,9 +64,15 @@ class Player:
         white_total = sum([ingredient.value for ingredient in self.bag.ingredients['picked']
                            if ingredient.color == 'white'])
 
+        final_position = self.droplet_position + self.rat_tails + overall_total
+
         self.bag.reset_picked_ingredients()
 
-        return [overall_total, white_total]
+        return {
+            'final_position': final_position,
+            'overall_total': overall_total,
+            'white_total': white_total
+        }
 
     def generate_statistics(self, show_ingredients=True, show_graphs=True, num_rounds=10000, risk_tolerance=0):
         """
@@ -95,14 +103,14 @@ class Player:
         exploded_round_values = []
         for i in range(num_rounds):
             temp_round_values = self.simulate_round()
-            exploded_round_values.append(temp_round_values[0])
+            exploded_round_values.append(temp_round_values['final_position'])
         print(f'\nExploded Maximum score: {np.max(exploded_round_values)}')
         print(f'Exploded Average score: {np.mean(exploded_round_values):.2f}')
 
         safe_round_values = []
         for i in range(num_rounds):
             temp_round_values = self.simulate_round(stop_before_explosion=True, risk_tolerance=risk_tolerance)
-            safe_round_values.append(temp_round_values[0])
+            safe_round_values.append(temp_round_values['final_position'])
         print(f'\nSafe Maximum score: {np.max(safe_round_values)}')
         print(f'Safe Average score: {np.mean(safe_round_values):.2f}')
 
@@ -118,7 +126,7 @@ class Player:
                 bins=np.max(exploded_round_values),
                 discrete=True
             )
-            plt.xlabel('Spaces Moved')
+            plt.xlabel('Place of Final Ingredient Token')
             plt.ylabel('Simulated Occurrences')
             plt.title('Playing Safe vs Picking Until Exploding:\nHow Often Will You Move X Spaces?')
             plt.legend(bbox_to_anchor=(1.02, 1), loc='upper left', labels=['Play Safe', 'Explode'], title='Strategy')
