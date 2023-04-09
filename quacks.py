@@ -130,11 +130,24 @@ class Player:
                 discrete=True
             )
 
-            # getting values to label the bars that are different to the number of spaces moved
+            # getting label values to use for each set (exploded vs safe) such that the bar from that set is only
+            # labelled with a number if it is the larger of the two, so that there is only one labelled bar
+            # per value on the x axis
             x_values = list(overall_df['value'].sort_values().unique())
-            label_values = [self.board.money_values[x_value] for x_value in x_values]
-            for bars in ax.containers:
-                ax.bar_label(bars, label_values)
+            exploded_labels = []
+            safe_labels = []
+            for value in x_values:
+                exploded_count = exploded_df[['value']].loc[exploded_df['value'] == value].count()[0]
+                safe_count = safe_df[['value']].loc[safe_df['value'] == value].count()[0]
+                if exploded_count >= safe_count:
+                    exploded_labels.append(self.board.money_values[value])
+                    safe_labels.append('')
+                else:
+                    exploded_labels.append('')
+                    safe_labels.append(self.board.money_values[value])
+
+            ax.bar_label(ax.containers[0], safe_labels)
+            ax.bar_label(ax.containers[1], exploded_labels)
 
             plt.xlabel('Place of Final Ingredient Token')
             plt.ylabel('Simulated Occurrences')
