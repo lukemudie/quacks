@@ -16,6 +16,8 @@ class Player:
         The players bag of ingredients.
     board : Board
         The board that the player is playing on.
+    droplet_position : int
+        How many spaces round the board the players' droplet is.
     rat_tails : int
         The number of rat tails available to the player.
     has_potion : bool
@@ -25,6 +27,7 @@ class Player:
         self.bag = Bag()
         self.board = Board()
 
+        self.droplet_position = 0
         self.rat_tails = 0
         self.has_potion = True
 
