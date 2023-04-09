@@ -119,8 +119,7 @@ class Player:
             safe_df = pd.DataFrame({'value': safe_round_values, 'run_type': 'safe'})
             overall_df = pd.concat([exploded_df, safe_df])
 
-            print(overall_df.dtypes)
-
+            sns.set_theme(style='white', palette='pastel')
             ax = sns.histplot(
                 data=overall_df,
                 x='value',
@@ -132,7 +131,7 @@ class Player:
 
             # getting label values to use for each set (exploded vs safe) such that the bar from that set is only
             # labelled with a number if it is the larger of the two, so that there is only one labelled bar
-            # per value on the x axis
+            # per value on the x-axis
             x_values = list(overall_df['value'].sort_values().unique())
             exploded_labels = []
             safe_labels = []
@@ -140,11 +139,11 @@ class Player:
                 exploded_count = exploded_df[['value']].loc[exploded_df['value'] == value].count()[0]
                 safe_count = safe_df[['value']].loc[safe_df['value'] == value].count()[0]
                 if exploded_count >= safe_count:
-                    exploded_labels.append(self.board.money_values[value])
+                    exploded_labels.append(self.board.money_values[value + 1])
                     safe_labels.append('')
                 else:
                     exploded_labels.append('')
-                    safe_labels.append(self.board.money_values[value])
+                    safe_labels.append(self.board.money_values[value + 1])
 
             ax.bar_label(ax.containers[0], safe_labels)
             ax.bar_label(ax.containers[1], exploded_labels)
