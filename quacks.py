@@ -131,6 +131,8 @@ class Board:
         A list of the values of points the player gets for finishing in each of the spaces.
     money_values : list of int
         A list of the values of 'money' the player gets for finishing on each of the spaces.
+    ruby_values : list of int
+        A list of how many rubies the player would get for finishing on each of the spaces.
     is_basic : bool
         Is the player using the basic or advanced side of the board?
     """
@@ -140,6 +142,8 @@ class Board:
         self.money_values = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 15, 16, 16, 17, 17, 18, 18,
                              19, 19, 20, 20, 21, 21, 22, 22, 23, 23, 24, 24, 25, 25, 26, 26, 27, 27, 28, 28,
                              29, 29, 30, 30, 31, 31, 32, 32, 33, 33, 35]
+        self.ruby_values = [0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0,
+                            1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0]
         self.is_basic = is_basic
 
 
