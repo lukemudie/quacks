@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import random
 from copy import deepcopy
+import warnings
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -260,8 +261,12 @@ class Bag:
         sum : int
             The sum of the values of all the tokens of the given color.
         """
-        return sum([ingredient.value for ingredient in self.ingredients[set_of_ingredients]
-                    if ingredient.color == color])
+        if set_of_ingredients in ['master', 'current', 'picked']:
+            return sum([ingredient.value for ingredient in self.ingredients[set_of_ingredients]
+                        if ingredient.color == color])
+        else:
+            warnings.warn(f"There is no set of ingredients '{set_of_ingredients}', so the sum will be 0.")
+            return 0
 
     def max_ingredient_color(self, color, set_of_ingredients='current'):
         """
@@ -279,16 +284,21 @@ class Bag:
         max : int
             The max of the values of all the tokens of the given color.
         """
-        len_chosen_ingredients = len(self.ingredients[set_of_ingredients])
-        colors_chosen_ingredients = list(
-            dict.fromkeys([ingredient.color for ingredient in self.ingredients[set_of_ingredients]])
-        )
-        if len_chosen_ingredients == 0 or color not in colors_chosen_ingredients:
-            return 0
-        else:
-            return max(
-                [ingredient.value for ingredient in self.ingredients[set_of_ingredients] if ingredient.color == color]
+        if set_of_ingredients in ['master', 'current', 'picked']:
+            len_chosen_ingredients = len(self.ingredients[set_of_ingredients])
+            colors_chosen_ingredients = list(
+                dict.fromkeys([ingredient.color for ingredient in self.ingredients[set_of_ingredients]])
             )
+            if len_chosen_ingredients == 0 or color not in colors_chosen_ingredients:
+                return 0
+            else:
+                return max(
+                    [ingredient.value for ingredient in self.ingredients[set_of_ingredients] if
+                     ingredient.color == color]
+                )
+        else:
+            warnings.warn(f"There is no set of ingredients '{set_of_ingredients}', so the max will be 0.")
+            return 0
 
     def current_picked_white_value(self):
         """Gives the total of all the white ingredients that have been picked so far"""

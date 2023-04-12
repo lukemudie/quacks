@@ -1,23 +1,52 @@
 import pytest
+import warnings
 from quacks import Bag, Ingredient
 
 
-class TestSumCurrentIngredientColor:
-    def test_default_sum(self):
-        """Check that the sum of all the white ingredients in a starting bag is 11."""
+class TestSumIngredientColor:
+    @pytest.mark.parametrize('test_input, expected_output', [('master', 11), ('current', 4), ('picked', 6)])
+    def test_specified_set(self, test_input, expected_output):
+        """Check that passing the set_of_ingredients parameter causes the sum to take place on the correct set."""
+        bag = Bag()
+        bag.ingredients['current'] = [Ingredient('white', 2), Ingredient('white', 1), Ingredient('white', 1)]
+        bag.ingredients['picked'] = [Ingredient('white', 3), Ingredient('white', 2), Ingredient('white', 1)]
+        assert bag.sum_ingredient_color('white', test_input) == expected_output
+
+    def test_no_set_specified(self):
+        """Check that not giving a set_of_ingredients will still return the correct result."""
         assert Bag().sum_ingredient_color('white') == 11
 
     def test_empty_color(self):
         """Check that if a no ingredients of a selected color exist in the bag, the sum is 0."""
         assert Bag().sum_ingredient_color('made_up_color') == 0
 
+    def test_wrong_set_name_warning(self):
+        """Check that if the set of ingredients parameter is wrong, the sum is 0 and a warning is raised."""
+        with pytest.warns(UserWarning):
+            assert Bag().sum_ingredient_color('white', 'made_up_set') == 0
+            warnings.warn("There is no set of ingredients 'made_up_set', so the sum will be 0.", UserWarning)
+
     def test_no_color_passed(self):
         """Error when no parameter is passed."""
         with pytest.raises(TypeError):
             Bag().sum_ingredient_color()
 
+    def test_empty_list(self):
+        """Return 0 when the list is empty"""
+        bag = Bag()
+        bag.ingredients['current'] = []
+        assert bag.sum_ingredient_color('white') == 0
 
-class TestMaxCurrentIngredientColor:
+
+class TestMaxIngredientColor:
+    @pytest.mark.parametrize('test_input, expected_output', [('master', 3), ('current', 2), ('picked', 1)])
+    def test_specified_set(self, test_input, expected_output):
+        """Check that passing the set_of_ingredients parameter causes the sum to take place on the correct set."""
+        bag = Bag()
+        bag.ingredients['current'] = [Ingredient('white', 2), Ingredient('white', 1), Ingredient('white', 1)]
+        bag.ingredients['picked'] = [Ingredient('white', 1), Ingredient('white', 1), Ingredient('white', 1)]
+        assert bag.max_ingredient_color('white', test_input) == expected_output
+
     def test_default_max(self):
         """Check the max ingredient value in the starting bag is a (white) 3."""
         assert Bag().max_ingredient_color('white') == 3
@@ -30,6 +59,12 @@ class TestMaxCurrentIngredientColor:
         """Error when no parameter is passed."""
         with pytest.raises(TypeError):
             Bag().max_ingredient_color()
+
+    def test_wrong_set_name_warning(self):
+        """Check that if the set of ingredients parameter is wrong, the sum is 0 and a warning is raised."""
+        with pytest.warns(UserWarning):
+            assert Bag().max_ingredient_color('white', 'made_up_set') == 0
+            warnings.warn("There is no set of ingredients 'made_up_set', so the max will be 0.", UserWarning)
 
     def test_empty_list(self):
         """Return 0 when the list is empty"""
