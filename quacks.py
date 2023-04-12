@@ -56,7 +56,7 @@ class Player:
         while picking:
             self.bag.pick_ingredient()
 
-            if self.bag.current_picked_white_value() > self.bag.explosion_limit:
+            if self.bag.get_picked_white_value() > self.bag.explosion_limit:
                 picking = False
             elif stop_before_explosion and self.bag.chance_to_explode() > risk_tolerance:
                 picking = False
@@ -300,13 +300,13 @@ class Bag:
             warnings.warn(f"There is no set of ingredients '{set_of_ingredients}', so the max will be 0.")
             return 0
 
-    def current_picked_white_value(self):
+    def get_picked_white_value(self):
         """Gives the total of all the white ingredients that have been picked so far"""
         return sum([ingredient.value for ingredient in self.ingredients['picked'] if ingredient.color == 'white'])
 
     def chance_to_explode(self):
         """Get the probability of exploding on the next pick based on what has been picked so far"""
-        value_needed_to_explode = self.explosion_limit - self.current_picked_white_value() + 1
+        value_needed_to_explode = self.explosion_limit - self.get_picked_white_value() + 1
         if self.max_ingredient_color('white') < value_needed_to_explode \
                 or len(self.ingredients['current']) == 0:
             chance_to_explode = 0

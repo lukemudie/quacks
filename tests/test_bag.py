@@ -76,13 +76,13 @@ class TestMaxIngredientColor:
 class TestPickedWhiteValue:
     def test_empty_value(self):
         """Check value is 0 when the picked list is empty"""
-        assert Bag().current_picked_white_value() == 0
+        assert Bag().get_picked_white_value() == 0
 
     def test_all_default_picked(self):
         """Check value is 11 when all the default white tokens have been picked"""
         bag = Bag()
         bag.ingredients['picked'] = bag.ingredients['master']
-        assert bag.current_picked_white_value() == 11
+        assert bag.get_picked_white_value() == 11
 
 
 class TestChanceToExplode:
