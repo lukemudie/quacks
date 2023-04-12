@@ -389,7 +389,8 @@ class Bag:
             self.ingredients['master'].remove(potential_ingredients[0])
             return potential_ingredients[0]
         else:
-            print('There is no ingredient in the bag that matches so none have been removed!')
+            warnings.warn(f"There is no ingredient in the bag that matches ({color}, {value}), "
+                          f"so none have been removed!")
             return None
 
     def return_to_baseline(self):
