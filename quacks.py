@@ -53,24 +53,38 @@ class Player:
         self.bag.reset_picked_ingredients()
 
         picking = True
-        while picking:
-            self.bag.pick_ingredient()
+        current_position = self.droplet_position + self.rat_tails
 
-            if self.bag.get_picked_white_value() > self.bag.explosion_limit:
+        # in the extreme edge case that even the starting configuration is too risky, don't do anything
+        if stop_before_explosion and self.bag.chance_to_explode() > risk_tolerance:
+            picking = False
+
+        while picking:
+            last_picked_ingredient = self.bag.pick_ingredient()
+
+            # will need to expand on this for effects in the future
+            current_position += last_picked_ingredient.value
+
+            has_exploded = self.bag.get_picked_white_value() > self.bag.explosion_limit
+            has_reached_end = current_position >= self.board.last_playable_space
+            has_no_ingredients = len(self.bag.ingredients['current']) == 0
+            has_exceeded_risk = stop_before_explosion and self.bag.chance_to_explode() > risk_tolerance
+
+            if has_exploded or has_reached_end or has_no_ingredients or has_exceeded_risk:
                 picking = False
-            elif stop_before_explosion and self.bag.chance_to_explode() > risk_tolerance:
-                picking = False
+
+            # make sure the last token is not placed beyond the playable space
+            if has_reached_end:
+                current_position = self.board.last_playable_space
 
         overall_value = sum([ingredient.value for ingredient in self.bag.ingredients['picked']])
         white_value = sum([ingredient.value for ingredient in self.bag.ingredients['picked']
                            if ingredient.color == 'white'])
 
-        final_position = self.droplet_position + self.rat_tails + overall_value
-
         self.bag.reset_picked_ingredients()
 
         return {
-            'final_position': final_position,
+            'final_position': current_position,
             'overall_value': overall_value,
             'white_value': white_value
         }
@@ -179,6 +193,7 @@ class Board:
         self.ruby_values = [0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0,
                             1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0]
         self.is_basic = is_basic
+        self.last_playable_space = len(self.money_values) - 1
 
 
 class Ingredient:
